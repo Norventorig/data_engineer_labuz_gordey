@@ -18,7 +18,7 @@ try:
 
         # Таблица users хранит информацию о пользователях. На данный момент только id и имя.
         cur.execute("CREATE TABLE IF NOT EXISTS users "
-                    "(id SERIAL PRIMARY KEY, username VARCHAR (40))")
+                    "(id SERIAL PRIMARY KEY)")
 
         # Таблицу логов я решил не делать отдельной таблицей для каждого типа действия.
         # log_id - идентификатор записи в таблице;
