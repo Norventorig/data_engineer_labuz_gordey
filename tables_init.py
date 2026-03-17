@@ -29,8 +29,7 @@ try:
         # time - дата действия.
         cur.execute("CREATE TABLE IF NOT EXISTS logs "
                     "(log_id SERIAL PRIMARY KEY, user_id INT REFERENCES users(id), "
-                    "action_type VARCHAR(30), entity_id INT NULL, is_success BOOLEAN, time TIMESTAMP, "
-                    "CHECK (action_type not in ('create_topic', 'delete_topic') OR user_id IS NOT Null))")
+                    "action_type VARCHAR(30), entity_id INT NULL, is_success BOOLEAN, time TIMESTAMP")
 
         # Я решил не создавать таблицу для entities, так как это будет избыточно и не требуется в тз.
         # Также для каждой типа придется создавать свою таблицу и логику.
