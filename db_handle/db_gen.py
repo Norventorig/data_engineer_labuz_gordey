@@ -1,28 +1,16 @@
-from typing import Any
-
 import psycopg2
 import numpy as np
 from datetime import datetime, timedelta
 
-import os
-from dotenv import load_dotenv
 
-load_dotenv()
-
-DB_USER = os.getenv("USER")
-DB_PASSWORD = os.getenv("PASSWORD")
-DB_HOST = os.getenv("HOST")
-DB_NAME = os.getenv("DBNAME")
-DB_PORT = os.getenv("PORT")
-
-
-def drop_old_data() -> None:
+def drop_old_data(db_config: dict) -> None:
     """
     Deletes old records
+    :param db_config: dict
     :rtype: None
     """
     try:
-        with psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, host=DB_HOST, port=DB_PORT) as con:
+        with psycopg2.connect(**db_config) as con:
             cur = con.cursor()
 
             cur.execute("DELETE FROM logs")
@@ -35,17 +23,18 @@ def drop_old_data() -> None:
         print("Old data deleted successfully")
 
 
-def users_generation(num_users: int = 20) -> None:
+def users_generation(db_config: dict, num_users: int = 20) -> None:
     """
     Generates specified number of new Users
+    :param db_config: dict
+    :param num_users: int
     :rtype: None
-    :param num_users:
     """
     users_data = [(f'User{i}', datetime.now() - timedelta(days=np.random.randint(1, 28))) for i in
                   range(1, num_users + 1)]
 
     try:
-        with psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, host=DB_HOST, port=DB_PORT) as con:
+        with psycopg2.connect(**db_config) as con:
             cur = con.cursor()
 
             cur.executemany(query="INSERT INTO users (username, created_at) VALUES (%s, %s)", vars_list=users_data)
@@ -57,14 +46,15 @@ def users_generation(num_users: int = 20) -> None:
         print("Users generated successfully")
 
 
-def get_user_ids() -> list[int] | None:
+def get_user_ids(db_config: dict) -> list[int] | None:
     """
     Returns a List containing all User IDs
+    :param db_config: dict
     :rtype: list[int] | None
     :return: user_ids
     """
     try:
-        with psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, host=DB_HOST, port=DB_PORT) as con:
+        with psycopg2.connect(**db_config) as con:
             cur = con.cursor()
 
             cur.execute("SELECT id FROM users")
@@ -78,23 +68,25 @@ def get_user_ids() -> list[int] | None:
         return user_ids
 
 
-def logs_generation(user_ids: list[int],
+def logs_generation(db_config: dict,
+                    user_ids: list[int],
                     actions: list[str] = None,
                     start_date: datetime = datetime(2026, 3, 1),
                     num_days: int = 30) -> None:
     """
     Generates logs
-    :rtype: None
+    :param db_config: dict
     :param actions: list[str]
     :param user_ids: list[int]
     :param start_date: datetime
     :param num_days: int
+    :rtype: None
     """
     if actions is None:
         actions = ['visit', 'register', 'login', 'logout', 'create_topic', 'view_topic', 'delete_topic', 'post']
 
     try:
-        with psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, host=DB_HOST, port=DB_PORT) as con:
+        with psycopg2.connect(**db_config) as con:
             cur = con.cursor()
 
             for day in range(num_days):
@@ -121,11 +113,30 @@ def logs_generation(user_ids: list[int],
         print("Logs generated successfully")
 
 
-def main():
-    drop_old_data()
-    users_generation()
-    logs_generation(user_ids=get_user_ids())
+def main(db_config: dict) -> None:
+    """
+    Function to run the script
+    :param db_config: dict
+    :rtype: None
+    """
+    drop_old_data(db_config=db_config)
+    users_generation(db_config=db_config)
+    user_ids = get_user_ids(db_config=db_config)
+    logs_generation(db_config=db_config, user_ids=user_ids)
 
 
 if __name__ == '__main__':
-    main()
+    import os
+    from dotenv import load_dotenv
+
+    load_dotenv()
+
+    database_config = {
+        "dbname": os.getenv("DBNAME"),
+        "user": os.getenv("USER"),
+        "password": os.getenv("PASSWORD"),
+        "host": os.getenv("HOST"),
+        "port": os.getenv("PORT"),
+    }
+
+    main(db_config=database_config)

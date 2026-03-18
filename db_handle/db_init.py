@@ -1,25 +1,18 @@
 import psycopg2
 
-import os
-from dotenv import load_dotenv
 
-
-load_dotenv()
-
-DB_USER = os.getenv("USER")
-DB_PASSWORD = os.getenv("PASSWORD")
-DB_HOST = os.getenv("HOST")
-DB_NAME = os.getenv("DBNAME")
-DB_PORT = os.getenv("PORT")
-
-
-def init_db():
+def init_db(db_config: dict) -> None:
+    """
+    Initializes the database with a given configuration without any data and tables
+    :param db_config: dict
+    :rtype: None
+    """
     try:
-        con = psycopg2.connect(database='postgres', user=DB_USER, password=DB_PASSWORD, host=DB_HOST, port=DB_PORT)
+        con = psycopg2.connect(**db_config)
         cur = con.cursor()
         con.autocommit = True
 
-        cur.execute(f"CREATE DATABASE {DB_NAME}")
+        cur.execute(f"CREATE DATABASE {db_config['dbname']}")
 
     except psycopg2.errors.DuplicateDatabase:
         print("Database already exists")
@@ -34,9 +27,14 @@ def init_db():
         con.close()
 
 
-def init_tables():
+def init_tables(db_config: dict) -> None:
+    """
+    Initialize all required tables for database
+    :param db_config: dict
+    :rtype: None
+    """
     try:
-        with psycopg2.connect(database=DB_NAME, user=DB_USER, password=DB_PASSWORD, host=DB_HOST, port=DB_PORT) as con:
+        with psycopg2.connect(**db_config) as con:
             cur = con.cursor()
 
             # Таблица users хранит информацию о пользователях. На данный момент только id и имя.
@@ -64,10 +62,23 @@ def init_tables():
         print(f'Tables created successfully')
 
 
-def main():
-    init_db()
-    init_tables()
+def main(db_config: dict) -> None:
+    init_db(db_config=db_config)
+    init_tables(db_config=db_config)
 
 
 if __name__ == "__main__":
-    main()
+    import os
+    from dotenv import load_dotenv
+
+    load_dotenv()
+
+    database_config = {
+        "dbname": os.getenv("DBNAME"),
+        "user": os.getenv("USER"),
+        "password": os.getenv("PASSWORD"),
+        "host": os.getenv("HOST"),
+        "port": os.getenv("PORT"),
+    }
+
+    main(db_config=database_config)
