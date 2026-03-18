@@ -16,5 +16,16 @@ db_config = {
 }
 
 if __name__ == '__main__':
-    db_init(db_config=db_config)
-    db_gen(db_config=db_config)
+    try:
+        if None in db_config.values():
+            raise Exception("Please provide database configuration")
+
+    except Exception as e:
+        print('Error: ', e)
+
+    else:
+        db_init(db_config=db_config)
+        db_gen(db_config=db_config)
+
+    finally:
+        print('db_handle/core.py script finished')
