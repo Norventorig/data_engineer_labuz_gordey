@@ -8,7 +8,10 @@ def init_db(db_config: dict) -> None:
     :rtype: None
     """
     try:
-        con = psycopg2.connect(**db_config)
+        admin_config = db_config.copy()
+        admin_config["dbname"] = "postgres"
+
+        con = psycopg2.connect(**admin_config)
         cur = con.cursor()
         con.autocommit = True
 
