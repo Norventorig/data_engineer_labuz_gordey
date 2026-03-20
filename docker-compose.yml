@@ -15,3 +15,5 @@ services:
       - db
     env_file:
       - .env
+    volumes:
+      - ./data:/app/data
