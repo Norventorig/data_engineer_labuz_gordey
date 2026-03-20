@@ -1,5 +1,5 @@
-from db_init import main as db_init
-from db_gen import main as db_gen
+from db_handle.db_init import main as db_init
+from db_handle.db_gen import main as db_gen
 
 
 def main(db_config: dict) -> None:
