@@ -2,7 +2,7 @@ from sqlalchemy import create_engine, text
 import pandas as pd
 
 
-def main(db_config: dict, output_file: str = "result.csv") -> None:
+def main(db_config: dict, output_file: str = "data/result.csv") -> None:
     """
     Creates aggregated csv file.
     :param db_config: dict
